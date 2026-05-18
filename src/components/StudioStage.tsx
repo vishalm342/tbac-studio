@@ -15,6 +15,9 @@ export default function StudioStage({ image, isGenerating }: Props) {
   useEffect(() => {
     if (!image || !canvasRef.current) return;
     
+    // The cleanup flag prevents stale memory draws
+    let isMounted = true;
+
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -23,6 +26,9 @@ export default function StudioStage({ image, isGenerating }: Props) {
     img.crossOrigin = "anonymous";
     img.src = image.url;
     img.onload = () => {
+      // Guard clause: if the component unmounted, stop drawing
+      if (!isMounted) return;
+
       // Set canvas to match image dimensions exactly
       canvas.width = image.width || 1024;
       canvas.height = image.height || 1024;
@@ -47,6 +53,11 @@ export default function StudioStage({ image, isGenerating }: Props) {
         ctx.strokeText(overlayText.toUpperCase(), x, y);
         ctx.fillText(overlayText.toUpperCase(), x, y);
       }
+    };
+
+    // This cleanup function runs right before the next useEffect execution
+    return () => {
+      isMounted = false;
     };
   }, [image, overlayText]);
 
