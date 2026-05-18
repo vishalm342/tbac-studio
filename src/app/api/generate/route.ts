@@ -8,6 +8,10 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  // Create an AbortController with a 15-second hard limit to prevent infinite hangs
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
+
   try {
     const body: TStudioState = await request.json();
     const { prompt, width, height, seed } = body;
@@ -18,22 +22,15 @@ export async function POST(request: NextRequest) {
 
     console.log(`[LIVE ENGINE] Generating image via Pollinations.ai for: "${prompt.substring(0, 40)}..."`);
 
-    // We use a random seed to ensure unique images for the same prompt if requested
     const imageSeed = seed || Math.floor(Math.random() * 1000000);
     const targetWidth = width || 1024;
     const targetHeight = height || 1024;
-
-    // Pollinations.ai accepts the prompt directly in the URL path.
-    // We encode the prompt to ensure special characters don't break the URL.
     const encodedPrompt = encodeURIComponent(prompt);
-    
-    // Construct the direct image URL. Pollinations handles the generation and returns the image binary.
-    // We append the seed, width, height, and nologo parameters.
     const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?seed=${imageSeed}&width=${targetWidth}&height=${targetHeight}&nologo=true`;
 
-    // We fetch the image from Pollinations to convert it to a base64 string.
-    // This ensures your frontend receives the same data structure it expects.
-    const response = await fetch(imageUrl);
+    // Fetch with the abort signal attached
+    const response = await fetch(imageUrl, { signal: controller.signal });
+    clearTimeout(timeoutId); // Clear the timeout if the fetch succeeds
 
     if (!response.ok) {
         throw new Error(`Pollinations API returned status: ${response.status}`);
@@ -44,18 +41,24 @@ export async function POST(request: NextRequest) {
     const dataUrl = `data:image/jpeg;base64,${base64Image}`;
 
     return NextResponse.json({
-      images: [
-        {
-          url: dataUrl,
-          width: targetWidth,
-          height: targetHeight,
-        }
-      ]
+      images: [{ url: dataUrl, width: targetWidth, height: targetHeight }]
     }, { status: 200 });
 
   } catch (error: unknown) {
+    clearTimeout(timeoutId);
     console.error("[CRITICAL PIPELINE EXCEPTION]:", error);
-    const fallbackMessage = error instanceof Error ? error.message : "Internal server process error.";
-    return NextResponse.json({ error: fallbackMessage }, { status: 500 });
+    
+    // Explicit network error handling
+    if (error instanceof Error) {
+      if (error.name === "AbortError") {
+        return NextResponse.json({ error: "Upstream generation timed out. AI servers are currently overloaded." }, { status: 504 });
+      }
+      if (error.message.includes("fetch failed") || error.message.includes("Connect Timeout")) {
+         return NextResponse.json({ error: "Network connection to AI node failed. Please try again." }, { status: 503 });
+      }
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    
+    return NextResponse.json({ error: "Unknown internal server disruption." }, { status: 500 });
   }
 }
