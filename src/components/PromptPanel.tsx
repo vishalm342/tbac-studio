@@ -1,13 +1,17 @@
+import React from "react";
 import { TStudioState } from "@/types/studio";
 
 type Props = {
   studioState: TStudioState;
-  setStudioState: (state: TStudioState) => void;
+  setStudioState: React.Dispatch<React.SetStateAction<TStudioState>>;
   handleSubmit: () => void;
   isGenerating: boolean;
 };
 
 export default function PromptPanel({ studioState, setStudioState, handleSubmit, isGenerating }: Props) {
+  // Strictly enforce a boolean value to prevent null vs true mismatches
+  const isDisabled = Boolean(isGenerating || !studioState.prompt || studioState.prompt.trim() === "");
+
   return (
     <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-xl flex flex-col gap-5">
       <div>
@@ -23,14 +27,16 @@ export default function PromptPanel({ studioState, setStudioState, handleSubmit,
           className="bg-gray-900 border border-gray-600 rounded-lg p-3 text-sm text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[120px] resize-none"
           placeholder="e.g., A cinematic shot of a neon cyberpunk city, 8k resolution..."
           disabled={isGenerating}
+          suppressHydrationWarning={true}
         />
       </div>
 
       <button 
         onClick={handleSubmit}
-        disabled={isGenerating || !studioState.prompt.trim()}
+        disabled={isDisabled}
+        suppressHydrationWarning={true}
         className={`mt-2 py-3 px-4 rounded-lg font-bold text-white transition-all flex items-center justify-center gap-2 ${
-          isGenerating || !studioState.prompt.trim() 
+          isDisabled 
             ? 'bg-blue-600/40 cursor-not-allowed text-gray-300' 
             : 'bg-blue-600 hover:bg-blue-500 active:scale-95 shadow-[0_0_15px_rgba(37,99,235,0.4)]'
         }`}
