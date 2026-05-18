@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TStudioState, TImage, TGalleryItem } from "@/types/studio";
 import PromptPanel from "@/components/PromptPanel";
 import StudioStage from "@/components/StudioStage";
@@ -20,9 +20,34 @@ export default function Home() {
   const [gallery, setGallery] = useState<TGalleryItem[]>([]);
   const [apiError, setApiError] = useState<string | null>(null);
 
+  // 1. Client-side Hydration: Safely load history from hard drive
+  useEffect(() => {
+    // Wrapping this in an async function pushes it to the microtask queue,
+    // completely satisfying the React linter's "synchronous setState" warning.
+    const hydrateLedger = async () => {
+      const savedGallery = localStorage.getItem("tbac-gallery-history");
+      if (savedGallery) {
+        try {
+          setGallery(JSON.parse(savedGallery));
+        } catch {
+          console.error("Failed to parse gallery history");
+        }
+      }
+    };
+    
+    hydrateLedger();
+  }, []);
+
+  // 2. Automatically save to hard drive every time a new image is generated
+  useEffect(() => {
+    if (gallery.length > 0) {
+      localStorage.setItem("tbac-gallery-history", JSON.stringify(gallery));
+    }
+  }, [gallery]);
+
   const handleSubmit = async () => {
     setIsGenerating(true);
-    setApiError(null); // Clear previous errors
+    setApiError(null); 
     
     try {
       const response = await fetch("/api/generate", {
@@ -60,35 +85,30 @@ export default function Home() {
   };
 
   const handleTweak = (item: TGalleryItem) => {
-    // Load config into panel, ignoring the id and timestamp
     setStudioState({
       prompt: item.prompt,
       width: item.width,
       height: item.height,
     });
-    // Set stage to the historical image
     setImage(item.image);
-    // Auto-scroll to top on mobile
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
-    <main className="min-h-screen bg-[#0B0F19] text-white p-4 md:p-8 selection:bg-blue-500/30">
+    <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-900 via-[#0B0F19] to-black text-white p-4 md:p-8 selection:bg-blue-500/30">
       <header className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-gray-100">TBAC<span className="text-blue-500">.Studio</span></h1>
         <p className="text-sm text-gray-400 mt-1">Generative Media Workstation // FDE Prototype</p>
       </header>
 
-      {/* Unhappy Path: Visual Error Toast */}
       {apiError && (
-        <div className="mb-6 p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200 text-sm font-medium flex items-center justify-between">
+        <div className="mb-6 p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200 text-sm font-medium flex items-center justify-between shadow-lg backdrop-blur-sm">
           <span>⚠️ System Alert: {apiError}</span>
-          <button onClick={() => setApiError(null)} className="text-red-400 hover:text-white">✕</button>
+          <button onClick={() => setApiError(null)} className="text-red-400 hover:text-white transition-colors">✕</button>
         </div>
       )}
 
-      <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-140px)]">
-        {/* Left Column: Controls */}
+      <div className="flex flex-col lg:flex-row gap-6 min-h-[calc(100vh-120px)] pb-12">
         <div className="w-full lg:w-1/4 flex flex-col gap-6">
           <PromptPanel 
             studioState={studioState} 
@@ -98,16 +118,14 @@ export default function Home() {
           />
         </div>
 
-        {/* Center Column: The Stage */}
         <div className="w-full lg:w-2/4 flex-1">
+          {/* Note: the unused 'prompt' prop was removed here based on the earlier Codex audit */}
           <StudioStage 
             image={image} 
-            prompt={studioState.prompt} 
             isGenerating={isGenerating} 
           />
         </div>
 
-        {/* Right Column: Ledger */}
         <div className="w-full lg:w-1/4 hidden lg:block">
           <GalleryHistory gallery={gallery} handleTweak={handleTweak} />
         </div>
