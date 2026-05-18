@@ -3,7 +3,6 @@ import { TImage } from "@/types/studio";
 
 type Props = {
   image: TImage | null;
-  prompt: string;
   isGenerating: boolean;
 };
 
