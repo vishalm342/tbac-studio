@@ -1,36 +1,25 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TBAC Studio // Forward Deployed Engineer Prototype
 
-## Getting Started
+A minimal, highly-resilient generative media workstation built for The Bombay AI Company FDE evaluation.
 
-First, run the development server:
+## 🚀 Live Deployment
+[Insert your Vercel Link Here]
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🧠 Architectural Decisions (The FDE Mindset)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**1. Ruthless Prioritization (Why a Single Page App?)**
+Following the directive to "keep the surface small and the foundation solid," I intentionally omitted bloated features (auth, routing, marketing pages) to focus 100% of my time on core state orchestration. The app uses a single, highly-dense control matrix to manage complex asynchronous state between the prompt terminal, the canvas stage, and the history ledger.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**2. The API Pivot (Pragmatism)**
+Initial integration with Fal.ai/Hugging Face yielded rigid paywalls and model routing constraints. Because the objective was to prove end-to-end generation, I bypassed these gates by pivoting the engine to **Pollinations.ai**—a keyless, RESTful inference node. This guaranteed a working, zero-friction pipeline for the reviewers.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**3. Defending the Unhappy Path**
+* **Timeouts:** The Next.js API route implements an `AbortController` with a strict 15-second cutoff to prevent infinite network hangs if the AI node goes down.
+* **Visual Feedback:** All API exceptions (timeouts, 503s) are caught and surfaced to the UI via a stateful error toast, ensuring the user is never left looking at a frozen screen.
+* **Memory Management:** The HTML5 Canvas `useEffect` utilizes cleanup booleans to prevent memory leaks and stale draws if the user rapidly clicks through their generation ledger.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## ✨ Features Completed
+* [x] **Generate:** Full prompt-to-image pipeline.
+* [x] **Gallery Ledger:** Session history stored with exact configurations.
+* [x] **Tweak:** Clicking a historical asset instantly reloads its parameters into the control matrix.
+* [x] **Bonus (Canvas):** Real-time text overlay baked directly into the image via HTML5 Canvas with export capabilities.
