@@ -3,7 +3,7 @@
 A minimal, highly-resilient generative media workstation built for The Bombay AI Company FDE evaluation.
 
 ## 🚀 Live Deployment
-[Insert your Vercel Link Here]
+https://tbac-studio.vercel.app/
 
 ## 🧠 Architectural Decisions (The FDE Mindset)
 
