@@ -1,26 +1,93 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --void: #0a0a0a;
+  --char: rgba(20, 20, 20, 0.6); /* Frosted translucent card base */
+  --ink: #282828;
+  --bone: #e5e5e5;
+  --mist: #c2c2c2;
+  --fog: #686868;
+  --hairline: rgba(229, 229, 229, 0.08);
+  --hairline-focus: rgba(229, 229, 229, 0.22);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html, body {
+  background: var(--void);
+  color: var(--bone);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Absolute Style Guide Alignment: The Pre-dawn Command Deck ── */
+.dim-card {
+  background: var(--char);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.dim-input {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--hairline);
+  border-radius: 9999px;
+  color: var(--bone);
+  font-size: 0.875rem;
+  transition: all 0.15s ease;
+  outline: none;
 }
+.dim-input:focus { border-color: var(--hairline-focus); background: var(--void); }
+
+.dim-textarea {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+  color: var(--bone);
+  font-size: 0.875rem;
+  font-family: inherit;
+  resize: none;
+  transition: all 0.15s ease;
+  outline: none;
+}
+.dim-textarea:focus { border-color: var(--hairline-focus); background: var(--void); }
+
+.dim-btn-primary {
+  background: var(--bone);
+  color: var(--void);
+  border-radius: 9999px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.dim-btn-primary:hover:not(:disabled) { background: #ffffff; box-shadow: 0 0 32px rgba(107, 98, 242, 0.25); }
+.dim-btn-primary:disabled { background: rgba(229, 229, 229, 0.1); color: var(--fog); cursor: not-allowed; }
+
+.dim-btn-secondary {
+  background: transparent;
+  color: var(--bone);
+  border: 1px solid var(--hairline);
+  border-radius: 9999px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+.dim-btn-secondary:hover { background: rgba(255,255,255,0.06); border-color: var(--hairline-focus); }
+.dim-btn-secondary:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.dim-divider { height: 1px; background: var(--hairline); }
+.dim-label { font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fog); }
+
+input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; }
+.dim-scroll::-webkit-scrollbar { height: 3px; }
+.dim-scroll::-webkit-scrollbar-thumb { background: var(--hairline-focus); border-radius: 9999px; }
