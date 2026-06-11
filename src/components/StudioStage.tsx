@@ -13,20 +13,16 @@ export default function StudioStage({ image, isGenerating }: Props) {
   useEffect(() => {
     if (!image || !canvasRef.current) return;
 
-    let isMounted = true;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const img = new window.Image();
-    img.crossOrigin = "anonymous";
     img.src = image.url;
 
     img.onload = () => {
-      if (!isMounted) return;
-
-      canvas.width = image.width || 1024;
-      canvas.height = image.height || 1024;
+      canvas.width = img.naturalWidth || 1024;
+      canvas.height = img.naturalHeight || 1024;
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
       if (overlayText.trim()) {
@@ -34,20 +30,13 @@ export default function StudioStage({ image, isGenerating }: Props) {
         ctx.strokeStyle = "black";
         ctx.lineWidth = 6;
         ctx.textAlign = "center";
-
         const fontSize = Math.floor(canvas.width * 0.06);
         ctx.font = `800 ${fontSize}px sans-serif`;
-
         const x = canvas.width / 2;
         const y = canvas.height - canvas.height * 0.08;
-
         ctx.strokeText(overlayText.toUpperCase(), x, y);
         ctx.fillText(overlayText.toUpperCase(), x, y);
       }
-    };
-
-    return () => {
-      isMounted = false;
     };
   }, [image, overlayText]);
 
@@ -70,7 +59,6 @@ export default function StudioStage({ image, isGenerating }: Props) {
         )}
       </div>
 
-      {/* Large canvas/preview area matching deployed layout */}
       <div
         className="relative flex items-center justify-center rounded-lg overflow-hidden"
         style={{
@@ -81,19 +69,23 @@ export default function StudioStage({ image, isGenerating }: Props) {
       >
         {isGenerating ? (
           <div className="flex flex-col items-center gap-3 text-center px-6">
-            <div
-              className="w-8 h-8 rounded-full border-2 border-white/20 border-t-white/80 animate-spin"
-            />
+            <div className="w-8 h-8 rounded-full border-2 border-white/20 border-t-white/80 animate-spin" />
             <span className="text-sm text-white/50 tracking-widest">
               SYNTHESIZING LATENT SPACE...
             </span>
           </div>
         ) : image ? (
-          <canvas
-            ref={canvasRef}
-            className="w-full h-full object-contain"
-            style={{ maxHeight: "480px" }}
-          />
+          <>
+            {/* Visible image display */}
+            <img
+              src={image.url}
+              alt="Generated output"
+              className="w-full h-full object-contain rounded-lg"
+              style={{ maxHeight: "480px" }}
+            />
+            {/* Hidden canvas for export with overlay */}
+            <canvas ref={canvasRef} className="hidden" />
+          </>
         ) : (
           <div className="flex flex-col items-center gap-3 text-center px-6">
             <svg
@@ -116,7 +108,6 @@ export default function StudioStage({ image, isGenerating }: Props) {
         )}
       </div>
 
-      {/* Overlay input + Export row */}
       <div className="flex gap-2">
         <input
           type="text"

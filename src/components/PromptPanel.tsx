@@ -59,7 +59,7 @@ export default function PromptPanel({ studioState, setStudioState, handleSubmit,
           <label className="dim-label">Steps</label>
           <input
             type="number"
-            value={studioState.numInferenceSteps ?? 30}
+            value={studioState.numInferenceSteps ?? 10}
             onChange={(e) => setStudioState({ ...studioState, numInferenceSteps: Number(e.target.value) })}
             className="dim-input text-center w-full px-3 py-2"
             disabled={isGenerating ? true : undefined}
