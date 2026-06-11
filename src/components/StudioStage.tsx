@@ -12,41 +12,43 @@ export default function StudioStage({ image, isGenerating }: Props) {
 
   useEffect(() => {
     if (!image || !canvasRef.current) return;
-    
+
     let isMounted = true;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const img = new Image();
+    const img = new window.Image();
     img.crossOrigin = "anonymous";
     img.src = image.url;
-    
+
     img.onload = () => {
       if (!isMounted) return;
-      
+
       canvas.width = image.width || 1024;
       canvas.height = image.height || 1024;
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      
+
       if (overlayText.trim()) {
         ctx.fillStyle = "white";
         ctx.strokeStyle = "black";
         ctx.lineWidth = 6;
         ctx.textAlign = "center";
-        
-        const fontSize = Math.floor(canvas.width * 0.06); 
+
+        const fontSize = Math.floor(canvas.width * 0.06);
         ctx.font = `800 ${fontSize}px sans-serif`;
-        
+
         const x = canvas.width / 2;
-        const y = canvas.height - (canvas.height * 0.08);
-        
+        const y = canvas.height - canvas.height * 0.08;
+
         ctx.strokeText(overlayText.toUpperCase(), x, y);
         ctx.fillText(overlayText.toUpperCase(), x, y);
       }
     };
-    
-    return () => { isMounted = false; };
+
+    return () => {
+      isMounted = false;
+    };
   }, [image, overlayText]);
 
   const downloadCanvas = () => {
@@ -60,52 +62,76 @@ export default function StudioStage({ image, isGenerating }: Props) {
   const isControlsDisabled = !image || isGenerating;
 
   return (
-    <div className="dim-card flex flex-col h-full" style={{ minHeight: "500px" }}>
-      <div className="flex justify-between items-center mb-4">
-        <h2 style={{ color: "var(--bone)", fontSize: "0.9375rem", fontWeight: 500 }}>Output Stage</h2>
+    <div className="dim-card flex flex-col gap-4 h-full">
+      <div className="flex items-center justify-between">
+        <h2 className="dim-label">OUTPUT STAGE</h2>
         {image && !isGenerating && (
-           <span className="dim-label text-green-400/80">RENDER COMPLETE</span>
+          <span className="text-xs text-green-400 tracking-widest">RENDER COMPLETE</span>
         )}
       </div>
 
-      <div 
-        className="flex-1 relative flex items-center justify-center overflow-hidden rounded-[16px]" 
-        style={{ background: "rgba(0,0,0,0.4)", border: "1px solid var(--hairline)" }}
+      {/* Large canvas/preview area matching deployed layout */}
+      <div
+        className="relative flex items-center justify-center rounded-lg overflow-hidden"
+        style={{
+          minHeight: "320px",
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.08)",
+        }}
       >
         {isGenerating ? (
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 rounded-full animate-spin" style={{ border: "2px solid rgba(229,229,229,0.1)", borderTopColor: "rgba(229,229,229,0.5)" }} />
-            <p className="dim-label">Synthesizing Latent Space...</p>
+          <div className="flex flex-col items-center gap-3 text-center px-6">
+            <div
+              className="w-8 h-8 rounded-full border-2 border-white/20 border-t-white/80 animate-spin"
+            />
+            <span className="text-sm text-white/50 tracking-widest">
+              SYNTHESIZING LATENT SPACE...
+            </span>
           </div>
         ) : image ? (
-          <canvas ref={canvasRef} className="max-w-full max-h-full object-contain rounded-md shadow-lg" />
+          <canvas
+            ref={canvasRef}
+            className="w-full h-full object-contain"
+            style={{ maxHeight: "480px" }}
+          />
         ) : (
-          <div className="flex flex-col items-center gap-3 select-none opacity-40">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <rect x="3" y="3" width="18" height="18" rx="3" />
+          <div className="flex flex-col items-center gap-3 text-center px-6">
+            <svg
+              width="40"
+              height="40"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1"
+              className="text-white/20"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
               <circle cx="8.5" cy="8.5" r="1.5" />
-              <path d="m21 15-5-5L5 21" />
+              <polyline points="21 15 16 10 5 21" />
             </svg>
-            <p className="dim-label">Awaiting generation command.</p>
+            <span className="text-sm text-white/30 tracking-widest">
+              AWAITING GENERATION COMMAND.
+            </span>
           </div>
         )}
       </div>
 
-      <div className="mt-5 pt-5 border-t border-[var(--hairline)] flex gap-3 items-center">
-        <input 
-          type="text" 
-          placeholder={image && !isGenerating ? "Type to overlay text/watermark..." : "Generate an asset to enable overlays..."}
-          value={overlayText} 
-          onChange={(e) => setOverlayText(e.target.value)} 
-          className="dim-input flex-1 px-4 py-2" 
+      {/* Overlay input + Export row */}
+      <div className="flex gap-2">
+        <input
+          type="text"
+          placeholder="Generate an asset to enable overlays..."
+          value={overlayText}
+          onChange={(e) => setOverlayText(e.target.value)}
+          className="dim-input flex-1 px-4 py-2"
           disabled={isControlsDisabled ? true : undefined}
           suppressHydrationWarning
         />
-        <button 
-          onClick={downloadCanvas} 
+        <button
+          onClick={downloadCanvas}
           disabled={isControlsDisabled ? true : undefined}
+          className="dim-btn-secondary px-4 py-2"
           suppressHydrationWarning
-          className="dim-btn-secondary px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Export Asset
         </button>

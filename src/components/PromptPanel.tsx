@@ -15,12 +15,12 @@ export default function PromptPanel({ studioState, setStudioState, handleSubmit,
   return (
     <div className="dim-card flex flex-col gap-6 h-full">
       <div>
-        <h2 style={{ color: "var(--bone)", fontSize: "0.9375rem", fontWeight: 500 }}>Control Matrix</h2>
+        <h2 style={{ color: "var(--bone)", fontSize: "0.9375rem", fontWeight: 500 }}>Create</h2>
         <p style={{ color: "var(--fog)", fontSize: "0.75rem", marginTop: "4px" }}>Define your generation parameters.</p>
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="dim-label">Primary Descriptor</label>
+        <label className="dim-label">Your Prompt</label>
         <textarea
           value={studioState.prompt}
           onChange={(e) => setStudioState({ ...studioState, prompt: e.target.value })}
@@ -85,7 +85,7 @@ export default function PromptPanel({ studioState, setStudioState, handleSubmit,
             Generating Asset...
           </>
         ) : (
-          "Execute Build Command"
+          "Generate Your Asset"
         )}
       </button>
     </div>

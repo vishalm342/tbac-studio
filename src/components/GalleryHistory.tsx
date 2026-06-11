@@ -12,7 +12,7 @@ export default function GalleryHistory({ gallery, handleTweak }: Props) {
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-4">
         <h2 style={{ color: "var(--bone)", fontSize: "0.9375rem", fontWeight: 500 }}>
-          Generation Ledger
+          Your Creations
         </h2>
         {gallery.length > 0 && (
           <span
