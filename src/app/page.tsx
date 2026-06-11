@@ -12,6 +12,7 @@ export default function Home() {
     prompt: "",
     width: 1024,
     height: 1024,
+    numInferenceSteps: 10,
   });
   
   const [image, setImage] = useState<TImage | null>(null);
@@ -95,8 +96,7 @@ export default function Home() {
       console.error("Network Exception:", error);
       setApiError(error instanceof Error ? error.message : "Failed to contact generation servers.");
     } finally {
-      // Handled independently within the fallback path if triggered
-      if (!image) setIsGenerating(false);
+      setIsGenerating(false);
     }
   };
 
